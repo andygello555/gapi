@@ -1,0 +1,15 @@
+github.com/andygello555/agem v1.0.0 h1:c9BL6bYWN6VPJlqQr4yhE5i1hv9GfwXzMQ3BTqPM5nQ=
+github.com/andygello555/agem v1.0.0/go.mod h1:QX1Da5PpvjO8oujQ2oOIVOxsI63t2mwzGMg2w2vnbzM=
+github.com/andygello555/game-scout v0.0.0-20230407215216-5e95c44330aa h1:+MMiIGVhZc9Vk7zTDwxVzcr2Yl32Kyr+hXwg06OudhQ=
+github.com/andygello555/game-scout v0.0.0-20230407215216-5e95c44330aa/go.mod h1:va44TAUi2cdZauiwXiXs37j/zm4OUm+Up9bnfGKPXSw=
+github.com/andygello555/gotils/v2 v2.2.0 h1:cuxHYiIfqJpmozNhRoxsNGVmzCFLiqI4yibT2674K3c=
+github.com/andygello555/gotils/v2 v2.2.0/go.mod h1:w+9GpBTgvBubwl3lrzmE3dUDBagzQQ+R35W9p92dAnY=
+github.com/deckarep/golang-set/v2 v2.3.0 h1:qs18EKUfHm2X9fA50Mr/M5hccg2tNnVqsiBImnyDs0g=
+github.com/deckarep/golang-set/v2 v2.3.0/go.mod h1:VAky9rY/yGXJOLEDv3OMci+7wtDpOF4IN+y82NBOac4=
+github.com/machinebox/graphql v0.2.2 h1:dWKpJligYKhYKO5A2gvNhkJdQMNZeChZYyBbrZkBZfo=
+github.com/machinebox/graphql v0.2.2/go.mod h1:F+kbVMHuwrQ5tYgU9JXlnskM8nOaFxCAEolaQybkjWA=
+github.com/matryer/is v1.4.0 h1:sosSmIWwkYITGrxZ25ULNDeKiMNzFSr4V/eqBQP0PeE=
+github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
+github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
+golang.org/x/exp v0.0.0-20230111222715-75897c7a292a h1:/YWeLOBWYV5WAQORVPkZF3Pq9IppkcT72GKnWjNf5W8=
+golang.org/x/exp v0.0.0-20230111222715-75897c7a292a/go.mod h1:CxIveKay+FTh1D0yPZemJVgC/95VzuuOLq5Qi4xnoYc=
