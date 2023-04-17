@@ -126,10 +126,9 @@ type bindingProto[ResT any, RetT any] struct {
 	paginated               bool
 	name                    string
 	nameSet                 bool
-	attrs                   map[string]any
-	attrsMutex              *sync.Mutex
+	attrs                   *sync.Map
 	attrFuncs               []Attr
-	attrFuncsMutex          *sync.Mutex
+	attrFuncsMutex          *sync.RWMutex
 }
 
 func (b bindingProto[ResT, RetT]) GetRequestMethod() BindingRequestMethod[ResT, RetT] {
@@ -400,7 +399,9 @@ func (b bindingProto[ResT, RetT]) Execute(client Client, args ...any) (response 
 	responseWrapperInt := responseWrapper.Interface()
 
 	ctx := context.Background()
-	if err = client.Run(ctx, b.Name(), b.attrs, req, &responseWrapperInt); err != nil {
+	attrs := make(map[string]any)
+	b.attrs.Range(func(key, value any) bool { attrs[key.(string)] = value; return true })
+	if err = client.Run(ctx, b.Name(), attrs, req, &responseWrapperInt); err != nil {
 		err = errors.Wrapf(err, "could not Execute Binding %T", b)
 		return
 	}
@@ -433,7 +434,11 @@ func (b bindingProto[ResT, RetT]) SetName(name string) Binding[ResT, RetT] {
 	return &b
 }
 
-func (b bindingProto[ResT, RetT]) Attrs() map[string]any { return b.attrs }
+func (b bindingProto[ResT, RetT]) Attrs() map[string]any {
+	attrs := make(map[string]any)
+	b.attrs.Range(func(key, value any) bool { attrs[key.(string)] = value; return true })
+	return attrs
+}
 
 func (b bindingProto[ResT, RetT]) AddAttrs(attrs ...Attr) Binding[ResT, RetT] {
 	b.attrFuncsMutex.Lock()
@@ -456,15 +461,15 @@ func (b bindingProto[ResT, RetT]) evaluateAttrs(client Client) {
 	}
 
 	evaluatedAttrIndexes := make([]int, 0)
+	b.attrFuncsMutex.RLock()
 	for i, attr := range b.attrFuncs {
 		key, val, ok := evaluate(attr)
 		if ok {
 			evaluatedAttrIndexes = append(evaluatedAttrIndexes, i)
-			b.attrsMutex.Lock()
-			b.attrs[key] = val
-			b.attrsMutex.Unlock()
+			b.attrs.Store(key, val)
 		}
 	}
+	b.attrFuncsMutex.RUnlock()
 
 	if len(evaluatedAttrIndexes) > 0 {
 		b.attrFuncsMutex.Lock()
@@ -523,7 +528,6 @@ func NewBinding[ResT any, RetT any](
 	paginated bool,
 	attrs ...Attr,
 ) Binding[ResT, RetT] {
-	var attrsMutex, attrFuncsMutex sync.Mutex
 	b := &bindingProto[ResT, RetT]{
 		requestMethod:           request,
 		responseWrapperMethod:   wrap,
@@ -531,10 +535,9 @@ func NewBinding[ResT any, RetT any](
 		responseMethod:          response,
 		paramsMethod:            params,
 		paginated:               paginated,
-		attrs:                   make(map[string]any),
-		attrsMutex:              &attrsMutex,
+		attrs:                   &sync.Map{},
 		attrFuncs:               attrs,
-		attrFuncsMutex:          &attrFuncsMutex,
+		attrFuncsMutex:          &sync.RWMutex{},
 	}
 	// We pre-evaluate any attributes that don't need access to the client
 	b.evaluateAttrs(nil)
@@ -562,13 +565,11 @@ func NewWrappedBinding[ResT any, RetT any](
 // default implementation) the returned Binding can then have its methods and properties set using the various setters
 // available on the Binding interface.
 func NewBindingChain[ResT any, RetT any](request BindingRequestMethod[ResT, RetT]) Binding[ResT, RetT] {
-	var attrsMutex, attrFuncsMutex sync.Mutex
 	b := &bindingProto[ResT, RetT]{
 		requestMethod:  request,
-		attrs:          make(map[string]any),
-		attrsMutex:     &attrsMutex,
+		attrs:          &sync.Map{},
 		attrFuncs:      make([]Attr, 0),
-		attrFuncsMutex: &attrFuncsMutex,
+		attrFuncsMutex: &sync.RWMutex{},
 	}
 	return b
 }

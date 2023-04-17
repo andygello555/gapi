@@ -18,6 +18,7 @@ import (
 )
 
 type httpClient struct {
+	URL string
 }
 
 func (h httpClient) Run(ctx context.Context, bindingName string, attrs map[string]any, req Request, res any) (err error) {
@@ -452,7 +453,7 @@ func ExampleNewAPI() {
 	// Then we create a Client instance. Here httpClient is a type that implements the Client interface, where
 	// Client.Run performs an HTTP request using http.DefaultClient, and then unmarshals the JSON response into the
 	// response wrapper.
-	client := httpClient{}
+	client := httpClient{URL: "https://fakestoreapi.com"}
 
 	// Finally, we create the API itself by creating and registering all our Bindings within the Schema using the
 	// NewWrappedBinding method. The "users" and "products" Bindings take only one argument: the limit argument. This
@@ -494,14 +495,18 @@ func ExampleNewAPI() {
 		),
 		// The "first_product" Binding showcases how to set the response method, as well as how to use the chaining API
 		// when creating Bindings. This will execute a similar HTTP request to the "products" Binding but
-		// Binding.Execute will instead return a single Product instance.
+		// Binding.Execute will instead return a single Product instance. We can also add more attributes to the Binding
+		// which we can access at any point from the Binding instance.
 		// Note: how the RetT type param is set to just "Product".
 		"first_product": WrapBinding(NewBindingChain(func(binding Binding[[]Product, Product], args ...any) (request Request) {
-			req, _ := http.NewRequest(http.MethodGet, "https://fakestoreapi.com/products?limit=1", nil)
+			client := binding.Attrs()["client"].(httpClient)
+			req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/products?limit=1", client.URL), nil)
 			return HTTPRequest{req}
 		}).SetResponseMethod(func(binding Binding[[]Product, Product], response []Product, args ...any) Product {
 			return response[0]
-		}).SetName("first_product")),
+		}).SetName("first_product").AddAttrs(func(client Client) (string, any) {
+			return "client", client.(httpClient)
+		})),
 	})
 
 	// Then we can execute our "users" binding with a limit of 3...
